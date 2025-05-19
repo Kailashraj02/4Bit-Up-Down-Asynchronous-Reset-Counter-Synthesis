@@ -19,6 +19,62 @@ Synthesis requires three files as follows,
 ◦ Verilog/VHDL Files (.v or .vhdl or .vhd)
 
 ◦ SDC (Synopsis Design Constraint) File (.sdc)
+```
+timescale 1ns/1ns
+module counter(clk,m,rst,count);
+input clk,m,rst;
+output reg [3:0] count;
+always@(posedge clk or negedge rst)
+begin
+if (!rst)
+count=0;
+else if(m)
+count=count+1;
+else
+count=count-1;
+end
+endmodule
+```
+```
+timescale 1ns/1ns
+module counter_test;
+reg clk,rst,m;
+wire [3:0] count;
+initial
+begin
+clk=0;
+rst=0;#5;
+rst=1;
+end
+initial
+begin
+m=1;
+#160 m=0;
+end
+counter dut(clk,m,rst,count);
+always #5 clk=~clk;
+initial $monitor("Time=%t rst=%b clk=%b count=%b" , $time,rst,clk,count);
+initial
+#320 $finish;
+endmodule
+```
+```
+read_libs /cadence/install/FOUNDRY-01/digital/90nm/dig/lib/slow.lib
+read_hdl counter.v
+elaborate
+read_sdc counter_con.sdc 
+syn_generic
+report_area
+syn_map
+report_area
+syn_opt
+report_area 
+report_area > counter_area.txt
+report_power > counter_power.txt
+report_cells > counter_cell.rpt
+write_hdl >counter_netlist.v
+gui_show
+```
 
  ### Step 2 : Creating an SDC File
 
